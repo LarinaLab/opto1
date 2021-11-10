@@ -82,12 +82,12 @@ try
 
     %fprintf(report, n_rows, n_cols, distance, units, time_at_point)
 
-    proceed = input("Proceed? Y or N", 's');
+    proceed = input("Proceed? Y or N: ", 's');
     if proceed == "Y"
-        fprintf("Beginning movement.");
+        fprintf("Beginning movement.\n\n");
     else
         connection.close();
-        error("Aborted.");
+        error("Aborted.\n");
     end
 
     %%
@@ -128,11 +128,11 @@ try
             
             java.lang.Thread.sleep(time1*1000);  % better accuracy at short times
             %laser on
-            fprintf("Turn the laser on!")
+            fprintf("Turn the laser on!\n")
             
             java.lang.Thread.sleep(time_at_point*1000);  % better accuracy at short times
             %laser off
-            fprintf("Turn the laser off!")
+            fprintf("Turn the laser off!\n")
             
             %pause
 
