@@ -3,12 +3,13 @@ close all force; clear; clc;
 import zaber.motion.ascii.Connection;
 import zaber.motion.Units;
 import zaber.motion.Library;
-%% 
+%%
 
 %connect to device
 Library.enableDeviceDbStore();
 connection = Connection.openSerialPort('COM5');
-%% 
+
+%%
 try
     %check the number of devices found
     deviceList = connection.detectDevices();
@@ -20,7 +21,7 @@ try
         error("Connection error: expected platform with 2 devices, x and y motors")
     else
         fprintf('Found %d devices.\nExpect 2 for platform; proceed with caution', deviceList.length);
-        proceed = input("Proceed? Y or N", 's');
+        proceed = input("Proceed? Y or N: ", 's');
         if proceed == "Y"
             fprintf("Proceeding. Caution Advised");
         else
@@ -29,7 +30,7 @@ try
         end
     end
 
-    %% 
+    %%
     device_y = deviceList(1);
     %moves platform forward (pos) and back (neg)
     y_axis = device_y.getAxis(1);
@@ -43,7 +44,7 @@ try
     y_axis.home();
     x_axis.home();
 
-    %% 
+    %%
     % wait for user input
     % Run parameters here
     %
@@ -78,9 +79,9 @@ try
 
 
     %%
-    report = "Planned %r by %c grid spaced %d %u, pausing %t at each location\n";
+    report = "Planned %d rows (%d %s between)\n  by %d columns (%d %s between) grid\npausing %.2f seconds at each location\n";
 
-    %fprintf(report, n_rows, n_cols, distance, units, time_at_point)
+    fprintf(report, n_rows, x_distance, units, n_cols, y_distance, units, time_at_point)
 
     proceed = input("Proceed? Y or N: ", 's');
     if proceed == "Y"
@@ -96,16 +97,17 @@ try
     % DO NOT GO NEGATIVE!!
     %x_offset = (n_cols-1) * x_distance / 2;
     x_cors = 0:n_cols-1;
-    x_cors = x_cors .* x_distance; %- x_offset;
+    x_cors = x_cors .* x_distance;
 
     %y_offset = (n_rows-1) * y_distance / 2;
     y_cors = 0:n_rows-1;
-    y_cors = y_cors .* y_distance; %- y_offset;
+    y_cors = y_cors .* y_distance;
 
     %map=table(rowNames);
 
     %%
-    %run_at = datetime('now');
+    run_at = datetime('now');
+
     schedule = table('Size',[n_rows*n_cols 4],'VariableTypes',{'double','double','double','double'},'VariableNames',{'ti','tf','x','y'});
     e = 0;
 
@@ -121,27 +123,24 @@ try
             x_axis.moveAbsolute(x, units);
             ti = toc;
             %toc
-            
+
             % record ti; pause for Δt; record tf
             %    To time the duration of an event, use the timeit or tic and toc functions
             %pause(time_at_point)
-            
+
             java.lang.Thread.sleep(time1*1000);  % better accuracy at short times
             %laser on
             fprintf("Turn the laser on!\n")
-            
+
             java.lang.Thread.sleep(time_at_point*1000);  % better accuracy at short times
             %laser off
             fprintf("Turn the laser off!\n")
-            
+
             %pause
 
             tf = toc;
             e=e+1;
             schedule(e,:) = table(ti, tf, x,y);
-            % disp([ti, tf, x,y])
-
-            %table may look nicer
 
         end
     end
@@ -152,12 +151,17 @@ try
     x_axis.home();
 
     connection.close();
+
+    % record (ti, tf, x, y) schedule (may be redundant in image processing)
+    output_file = sprintf("schedule_%s.txt", datestr(run_at, 'yyyy.mm.dd_HHMM.SS'));
+    writetable(schedule, output_file,'Delimiter','\t');
+    fprintf("\nSchedule saved to %s\nSuccess!", output_file);
+
+
 catch exception
+    %% This happens if there was any problem in the above section
+    %   to make sure the connection closes anyway.
     fprintf("Fail\n")
     connection.close();
     rethrow(exception);
 end
-
-% record (ti, tf, x, y) schedule (may be redundant in image processing)
-    
-
