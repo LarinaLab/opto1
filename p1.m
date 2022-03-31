@@ -40,7 +40,7 @@ try
     %moves platform forward (pos) and back (neg)
     x_axis = device_x.getAxis(1);
 
-    %now you're set to move!
+    %now you''re set to move!
     y_axis.home();
     x_axis.home();
 
@@ -51,6 +51,9 @@ try
     % %%%%%%%%%%%%%%%
     n_rows = 3;
     n_cols = 6;
+    y_accel = 20 % in Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
+    x_accel = 20 % in Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
+
 
     %Units.LENGTH_MICROMETRES
     %Units.LENGTH_NANOMETRES
@@ -77,6 +80,18 @@ try
     %
     % end variables section
 
+    %%
+    %To avoid jerky movements, set acceleration ('accel') (and/or maxspeed)
+    %Note that at the end the program should set it properly back to the initial values
+    % Before I changed any of them, both accel is 59.5894 nits.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
+    % and both maxspeed are 5.9999 Units.VELOCITY_MILLIMETRES_PER_SECOND
+    initial_accel_x = x_axis.getSettings().get('accel', Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
+    axis.getSettings().set('accel', x_accel, Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
+    fprintf('Maximum speed X[mm/s]: %d.\n', x_accel);
+
+    initial_accel_y = axis.getSettings().get('accel', Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
+    axis.getSettings().set('accel', y_accel, Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
+    fprintf('Maximum speed X[mm/s]: %d.\n', y_accel);
 
     %%
     report = "Planned %d rows (%d %s between)\n  by %d columns (%d %s between) grid\npausing %.2f seconds at each location\n";
@@ -157,6 +172,8 @@ try
     writetable(schedule, output_file,'Delimiter','\t');
     fprintf("\nSchedule saved to %s\nSuccess!", output_file);
 
+    x_axis.getSettings().set('accel', initial_accel_x, Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
+    y_axis.getSettings().set('accel', initial_accel_y, Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
 
 catch exception
     %% This happens if there was any problem in the above section
