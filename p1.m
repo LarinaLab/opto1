@@ -51,8 +51,8 @@ try
     % %%%%%%%%%%%%%%%
     n_rows = 3;
     n_cols = 6;
-    y_accel = 20 % in Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
-    x_accel = 20 % in Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
+    y_accel = 15; % in Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
+    x_accel = 15; % in Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
 
 
     %Units.LENGTH_MICROMETRES
@@ -85,12 +85,12 @@ try
     %Note that at the end the program should set it properly back to the initial values
     % Before I changed any of them, both accel is 59.5894 nits.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
     % and both maxspeed are 5.9999 Units.VELOCITY_MILLIMETRES_PER_SECOND
-    initial_accel_x = x_axis.getSettings().get('accel', Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
-    axis.getSettings().set('accel', x_accel, Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
+    initial_accel_x = x_axis.getSettings().get('accel', units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
+    x_axis.getSettings().set('accel', x_accel, units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
     fprintf('Maximum speed X[mm/s]: %d.\n', x_accel);
 
-    initial_accel_y = axis.getSettings().get('accel', Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
-    axis.getSettings().set('accel', y_accel, Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
+    initial_accel_y = y_axis.getSettings().get('accel', units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
+    y_axis.getSettings().set('accel', y_accel, units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
     fprintf('Maximum speed X[mm/s]: %d.\n', y_accel);
 
     %%
@@ -99,7 +99,7 @@ try
     fprintf(report, n_rows, x_distance, units, n_cols, y_distance, units, time_at_point)
 
     proceed = input("Proceed? Y or N: ", 's');
-    if proceed == "Y"
+    if upper(proceed) == "Y"
         fprintf("Beginning movement.\n\n");
     else
         connection.close();
@@ -130,6 +130,7 @@ try
     %	go to top left of field
     tic
     for y=y_cors
+        fprintf("Starting row %.2f\n", y/y_distance);
         % go to y - move delta should also work, this would have better accuracy
         y_axis.moveAbsolute(y, units);
 
@@ -165,6 +166,10 @@ try
     y_axis.home();
     x_axis.home();
 
+    %reset the acceleration
+    x_axis.getSettings().set('accel', initial_accel_x, Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
+    y_axis.getSettings().set('accel', initial_accel_y, Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
+
     connection.close();
 
     % record (ti, tf, x, y) schedule (may be redundant in image processing)
@@ -172,9 +177,7 @@ try
     writetable(schedule, output_file,'Delimiter','\t');
     fprintf("\nSchedule saved to %s\nSuccess!", output_file);
 
-    x_axis.getSettings().set('accel', initial_accel_x, Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
-    y_axis.getSettings().set('accel', initial_accel_y, Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED);
-
+    
 catch exception
     %% This happens if there was any problem in the above section
     %   to make sure the connection closes anyway.
