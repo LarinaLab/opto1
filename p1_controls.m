@@ -9,12 +9,12 @@ classdef p1_controls
 
         %%
         function import_zaber()
-            % This doesn't actually seem to work
+            % This doesn''t actually seem to work
             import zaber.motion.ascii.Connection;
             import zaber.motion.Units;
             import zaber.motion.Library;
         end
-        
+
         %%
         function connection = connect()
             import zaber.motion.ascii.Connection;
@@ -133,30 +133,52 @@ classdef p1_controls
                         'time_at_point',time_at_point, 'x_accel',x_accel, ...
                          'y_accel',y_accel, 'units_accel',units_accel);
         end
-        
+
         %%
         function [initial_accel_x, initial_accel_y] = setAccel(x_axis, y_axis, x_accel, y_accel, units_accel)
             import zaber.motion.Units;
-            
+
             unit_map = containers.Map('KeyType', 'char', 'ValueType','any');
             unit_map('METRES') = Units.ACCELERATION_METRES_PER_SECOND_SQUARED;
             unit_map('CENTIMETRES') = Units.ACCELERATION_CENTIMETRES_PER_SECOND_SQUARED;
             unit_map('MILLIMETRES') = Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED;
             unit_map('MICROMETRES') = Units.ACCELERATION_MICROMETRES_PER_SECOND_SQUARED;
             unit_map('NANOMETRES') = Units.ACCELERATION_NANOMETRES_PER_SECOND_SQUARED;
-            
+
             unit_a = unit_map(units_accel);
-            
-            
+
+
             %To avoid jerky movements, set acceleration ('accel') (and/or maxspeed)
             %Note that at the end the program should set it properly back to the initial values
             % Before I changed any of them, both accel is 59.5894 nits.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
             % and both maxspeed are 5.9999 Units.VELOCITY_MILLIMETRES_PER_SECOND
             initial_accel_x = x_axis.getSettings().get('accel', unit_a);
             x_axis.getSettings().set('accel', x_accel, unit_a);
-            
+
             initial_accel_y = y_axis.getSettings().get('accel', unit_a);
             y_axis.getSettings().set('accel', y_accel, unit_a);
+        end
+
+        %%
+        function point_order = scan_plan(n_rows, x_distance, n_cols, y_distance)
+            % calculate field points
+            x_cors = 0:n_cols-1;
+            x_cors = x_cors .* x_distance;
+
+            y_cors = 0:n_rows-1;
+            y_cors = y_cors .* y_distance;
+
+            %map=table(rowNames);
+            point_order = table('Size',[n_rows*n_cols 4],'VariableTypes',{'double','double'},'VariableNames',{'x','y'});
+
+            e=0
+            for y=y_cors
+                for x=x_cors
+                    e=e+1;
+                    schedule(e,:) = table(x,y);
+                end
+                x_cors=fliplr(x_cors)
+            end
         end
 
         %%
@@ -165,7 +187,7 @@ classdef p1_controls
             import zaber.motion.ascii.Connection;
             import zaber.motion.Units;
             import zaber.motion.Library;
-            
+
             %% switch units
             unit_map = containers.Map('KeyType', 'char', 'ValueType','any');
             unit_map('METRES') = Units.LENGTH_METRES;
@@ -173,7 +195,7 @@ classdef p1_controls
             unit_map('MILLIMETRES') = Units.LENGTH_MILLIMETRES;
             unit_map('MICROMETRES') = Units.LENGTH_MICROMETRES;
             unit_map('NANOMETRES') = Units.LENGTH_NANOMETRES;
-            
+
             unit_l = unit_map(units_dist);
 
             %%
@@ -227,8 +249,9 @@ classdef p1_controls
                     tf = toc;
                     e=e+1;
                     schedule(e,:) = table(ti, tf, x,y);
-
                 end
+
+                x_cors=fliplr(x_cors)
             end
 
             %%
@@ -244,7 +267,7 @@ classdef p1_controls
             fprintf("\nSchedule saved to %s\nSuccess!", output_file);
             fprintf("Don't forget to close the connection!");
         end
-        
+
         %%
         function disconnect(connection)
             connection.close()
