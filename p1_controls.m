@@ -161,7 +161,7 @@ classdef p1_controls
         end
 
         %%
-        function output_file = run_scan(x_axis, y_axis, n_rows, x_distance, n_cols, y_distance, units_dist,...
+        function output_file = run_scan(app, x_axis, y_axis, n_rows, x_distance, n_cols, y_distance, units_dist,...
                      time1, time_at_point)
             import zaber.motion.ascii.Connection;
             import zaber.motion.Units;
@@ -206,20 +206,28 @@ classdef p1_controls
                     ti = toc;
 
                     %pause(time_at_point)
-                    if time1 < time_at_point
-                        java.lang.Thread.sleep(time1*1000);  % better accuracy at short times
+                    if time1 < time_at_point || time1 == 0
+                        %java.lang.Thread.sleep(time1*1000);  % better accuracy at short times
+                        %using pause instead of sleep 
+                        % to let the button color change
+                        pause(time1);
                         %laser on
                         fprintf("Turn the laser on! \n")
-                        %app.LaserPromptButton.BackgroundColor = [.1, .8, .8];
-                        %app.LaserPromptButton.Text = "Turn the laser on!";
+                        app.LaserPromptButton.BackgroundColor = [0.3, 0.93, .97];
+                        app.LaserPromptButton.Text = "Turn the laser on!";
 
-                        java.lang.Thread.sleep((time_at_point-time1)*1000);  % better accuracy at short times
+                        %java.lang.Thread.sleep((time_at_point-time1)*1000);  % better accuracy at short times
+                        pause(time_at_point-time1);
                         %laser off
                         fprintf("Turn the laser off!\n")
-                        %app.LaserPromptButton.BackgroundColor = [.94,.94,.94];
-                        %app.LaserPromptButton.Text = "Turn the laser off!";
+                        app.LaserPromptButton.BackgroundColor = [.94,.94,.94];
+                        app.LaserPromptButton.Text = "Turn the laser off!";
+                        pause(0.01)
                     else
-                        java.lang.Thread.sleep((time_at_point)*1000);  % better accuracy at short times
+                        app.LaserPromptButton.BackgroundColor = [.94,.94,.94];
+                        app.LaserPromptButton.Text = "laser off";
+                        %java.lang.Thread.sleep((time_at_point)*1000);  % better accuracy at short times
+                        pause(time_at_point)
                     end
                     
                     tf = toc;
@@ -236,12 +244,9 @@ classdef p1_controls
             y_axis.home();
             x_axis.home();
 
-            %connection.close();
-
             % record (ti, tf, x, y) schedule (may be redundant in image processing)
             output_file = sprintf("schedule_%s.txt", datestr(run_at, 'yyyy.mm.dd_HHMM.SS'));
             writetable(schedule, output_file,'Delimiter','\t');
-            fprintf("\nSchedule saved to %s\nSuccess!\n", output_file);
         end
         
         %%
