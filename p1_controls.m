@@ -95,7 +95,7 @@ classdef p1_controls
             %y_distance = length / (n_rows-1)
 
             time1 = 5; %seconds
-            time_at_point = 15; %seconds
+            time_at_point = 20; %seconds
 
             params = struct('n_rows',n_rows, 'x_distance',x_distance, "n_cols",n_cols, ...
                         'y_distance',y_distance, 'units',units, 'time1',time1, ...
@@ -200,27 +200,29 @@ classdef p1_controls
                 for x=x_cors
                     % go to x or move delta
                     x_axis.moveAbsolute(x, unit_l);
-                    ti = toc;
-                    %toc
-
                     % record ti; pause for Δt; record tf
                     %    To time the duration of an event, use the timeit or tic and toc functions
+                    ti = toc;
+
                     %pause(time_at_point)
+                    if time1 < time_at_point
+                        java.lang.Thread.sleep(time1*1000);  % better accuracy at short times
+                        %laser on
+                        fprintf("Turn the laser on!\n")
 
-                    java.lang.Thread.sleep(time1*1000);  % better accuracy at short times
-                    %laser on
-                    fprintf("Turn the laser on!\n")
-
-                    java.lang.Thread.sleep((time_at_point-time1)*1000);  % better accuracy at short times
-                    %laser off
-                    fprintf("Turn the laser off!\n")
-
-                    %pause
-
+                        java.lang.Thread.sleep((time_at_point-time1)*1000);  % better accuracy at short times
+                        %laser off
+                        fprintf("Turn the laser off!\n")
+                    else
+                        java.lang.Thread.sleep((time_at_point)*1000);  % better accuracy at short times
+                    end
+                    
                     tf = toc;
                     e=e+1;
                     schedule(e,:) = table(ti, tf, x,y);
                 end
+                %flipping here makes it go in a zig-zag
+                % rather than moving to the left of each line
                 x_cors = fliplr(x_cors);
             end
 
