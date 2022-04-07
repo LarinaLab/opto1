@@ -176,19 +176,12 @@ classdef p1_controls
             
             unit_l = unit_map(units_dist);
 
-            %%
-            % calculate field points
-
-            % DO NOT GO NEGATIVE!!
-            %x_offset = (n_cols-1) * x_distance / 2;
+            %% calculate field points
             x_cors = 0:n_cols-1;
             x_cors = x_cors .* x_distance;
 
-            %y_offset = (n_rows-1) * y_distance / 2;
             y_cors = 0:n_rows-1;
             y_cors = y_cors .* y_distance;
-
-            %map=table(rowNames);
 
             %%
             run_at = datetime('now');
@@ -218,7 +211,7 @@ classdef p1_controls
                     %laser on
                     fprintf("Turn the laser on!\n")
 
-                    java.lang.Thread.sleep(time_at_point*1000);  % better accuracy at short times
+                    java.lang.Thread.sleep((time_at_point-time1)*1000);  % better accuracy at short times
                     %laser off
                     fprintf("Turn the laser off!\n")
 
@@ -227,8 +220,8 @@ classdef p1_controls
                     tf = toc;
                     e=e+1;
                     schedule(e,:) = table(ti, tf, x,y);
-
                 end
+                x_cors = fliplr(x_cors);
             end
 
             %%
@@ -241,8 +234,7 @@ classdef p1_controls
             % record (ti, tf, x, y) schedule (may be redundant in image processing)
             output_file = sprintf("schedule_%s.txt", datestr(run_at, 'yyyy.mm.dd_HHMM.SS'));
             writetable(schedule, output_file,'Delimiter','\t');
-            fprintf("\nSchedule saved to %s\nSuccess!", output_file);
-            fprintf("Don't forget to close the connection!");
+            fprintf("\nSchedule saved to %s\nSuccess!\n", output_file);
         end
         
         %%
