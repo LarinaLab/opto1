@@ -2,10 +2,11 @@ classdef p1_controls
     methods (Static)
 
         %%
-        function say_hi()
+        function say_hi(app)
             fprintf("Hello World!\n")
+            app.LaserPromptButton.BackgroundColor = [1, 1, 1];
+            app.LaserPromptButton.Text = "Hello World!";
         end
-
 
         %%
         function import_zaber()
@@ -208,11 +209,15 @@ classdef p1_controls
                     if time1 < time_at_point
                         java.lang.Thread.sleep(time1*1000);  % better accuracy at short times
                         %laser on
-                        fprintf("Turn the laser on!\n")
+                        fprintf("Turn the laser on! \n")
+                        %app.LaserPromptButton.BackgroundColor = [.1, .8, .8];
+                        %app.LaserPromptButton.Text = "Turn the laser on!";
 
                         java.lang.Thread.sleep((time_at_point-time1)*1000);  % better accuracy at short times
                         %laser off
                         fprintf("Turn the laser off!\n")
+                        %app.LaserPromptButton.BackgroundColor = [.94,.94,.94];
+                        %app.LaserPromptButton.Text = "Turn the laser off!";
                     else
                         java.lang.Thread.sleep((time_at_point)*1000);  % better accuracy at short times
                     end
