@@ -172,20 +172,20 @@ classdef p1_controls
             %map=table(rowNames);
             point_order = table('Size',[n_rows*n_cols 4],'VariableTypes',{'double','double'},'VariableNames',{'x','y'});
 
-            e=0
+            e=0;
             for y=y_cors
                 for x=x_cors
                     e=e+1;
-                    schedule(e,:) = table(x,y);
+                    point_order(e,:) = table(x,y);
                 end
-                x_cors=fliplr(x_cors)
+                x_cors=fliplr(x_cors);
             end
         end
 
         %%
 
         function output_file = run_scan(app, x_axis, y_axis, n_rows, x_distance, n_cols, y_distance, units_dist,...
-          time1, time_at_point)
+          time1, time_at_point, out_to)
             import zaber.motion.ascii.Connection;
             import zaber.motion.Units;
             import zaber.motion.Library;
@@ -231,7 +231,7 @@ classdef p1_controls
                     %pause(time_at_point)
                     if time1 < time_at_point || time1 == 0
                         %java.lang.Thread.sleep(time1*1000);  % better accuracy at short times
-                        %using pause instead of sleep
+                        %using pause instead of sleep 
                         % to let the button color change
                         pause(time1);
                         %laser on
@@ -252,7 +252,7 @@ classdef p1_controls
                         %java.lang.Thread.sleep((time_at_point)*1000);  % better accuracy at short times
                         pause(time_at_point)
                     end
-
+                    
                     tf = toc;
                     e=e+1;
                     schedule(e,:) = table(ti, tf, x,y);
@@ -268,7 +268,7 @@ classdef p1_controls
             x_axis.home();
 
             % record (ti, tf, x, y) schedule (may be redundant in image processing)
-            output_file = sprintf("schedule_%s.txt", datestr(run_at, 'yyyy.mm.dd_HHMM.SS'));
+            output_file = sprintf("%s_schedule_%s.txt", out_to, datestr(run_at, 'yyyy.mm.dd_HHMM.SS'));
             writetable(schedule, output_file,'Delimiter','\t');
         end
 
