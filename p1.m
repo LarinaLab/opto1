@@ -65,7 +65,7 @@ try
     %y_distance = length / (n_rows-1)
 
     time1 = 5; %seconds
-    time_at_point = 15; %seconds
+    time_at_point = 20; %seconds
     %%n_rows = input("How many rows?"); %ie, 4
     %n_cols = input("How many columns?");
     %units = input("Units, ie Units.LENGTH_MILLIMETRES or Units.LENGTH_MICROMETRES");
@@ -148,7 +148,7 @@ try
             %laser on
             fprintf("Turn the laser on!\n")
 
-            java.lang.Thread.sleep(time_at_point*1000);  % better accuracy at short times
+            java.lang.Thread.sleep((time_at_point-time1)*1000);  % better accuracy at short times
             %laser off
             fprintf("Turn the laser off!\n")
 

@@ -2,10 +2,11 @@ classdef p1_controls
     methods (Static)
 
         %%
-        function say_hi()
+        function say_hi(app)
             fprintf("Hello World!\n")
+            app.LaserPromptButton.BackgroundColor = [1, 1, 1];
+            app.LaserPromptButton.Text = "Hello World!";
         end
-
 
         %%
         function import_zaber()
@@ -95,7 +96,7 @@ classdef p1_controls
             %y_distance = length / (n_rows-1)
 
             time1 = 5; %seconds
-            time_at_point = 15; %seconds
+            time_at_point = 20; %seconds
 
             params = struct('n_rows',n_rows, 'x_distance',x_distance, "n_cols",n_cols, ...
                         'y_distance',y_distance, 'units',units, 'time1',time1, ...
@@ -182,8 +183,9 @@ classdef p1_controls
         end
 
         %%
-        function output_file = run_scan(x_axis, y_axis, n_rows, x_distance, n_cols, y_distance, units_dist,...
-                     time1, time_at_point)
+
+        function output_file = run_scan(app, x_axis, y_axis, n_rows, x_distance, n_cols, y_distance, units_dist,...
+          time1, time_at_point)
             import zaber.motion.ascii.Connection;
             import zaber.motion.Units;
             import zaber.motion.Library;
@@ -198,19 +200,12 @@ classdef p1_controls
 
             unit_l = unit_map(units_dist);
 
-            %%
-            % calculate field points
-
-            % DO NOT GO NEGATIVE!!
-            %x_offset = (n_cols-1) * x_distance / 2;
+            %% calculate field points
             x_cors = 0:n_cols-1;
             x_cors = x_cors .* x_distance;
 
-            %y_offset = (n_rows-1) * y_distance / 2;
             y_cors = 0:n_rows-1;
             y_cors = y_cors .* y_distance;
-
-            %map=table(rowNames);
 
             %%
             run_at = datetime('now');
@@ -229,29 +224,42 @@ classdef p1_controls
                 for x=x_cors
                     % go to x or move delta
                     x_axis.moveAbsolute(x, unit_l);
-                    ti = toc;
-                    %toc
-
                     % record ti; pause for Δt; record tf
                     %    To time the duration of an event, use the timeit or tic and toc functions
+                    ti = toc;
+
                     %pause(time_at_point)
+                    if time1 < time_at_point || time1 == 0
+                        %java.lang.Thread.sleep(time1*1000);  % better accuracy at short times
+                        %using pause instead of sleep
+                        % to let the button color change
+                        pause(time1);
+                        %laser on
+                        fprintf("Turn the laser on! \n")
+                        app.LaserPromptButton.BackgroundColor = [0.3, 0.93, .97];
+                        app.LaserPromptButton.Text = "Turn the laser on!";
 
-                    java.lang.Thread.sleep(time1*1000);  % better accuracy at short times
-                    %laser on
-                    fprintf("Turn the laser on!\n")
-
-                    java.lang.Thread.sleep(time_at_point*1000);  % better accuracy at short times
-                    %laser off
-                    fprintf("Turn the laser off!\n")
-
-                    %pause
+                        %java.lang.Thread.sleep((time_at_point-time1)*1000);  % better accuracy at short times
+                        pause(time_at_point-time1);
+                        %laser off
+                        fprintf("Turn the laser off!\n")
+                        app.LaserPromptButton.BackgroundColor = [.94,.94,.94];
+                        app.LaserPromptButton.Text = "Turn the laser off!";
+                        pause(0.01)
+                    else
+                        app.LaserPromptButton.BackgroundColor = [.94,.94,.94];
+                        app.LaserPromptButton.Text = "laser off";
+                        %java.lang.Thread.sleep((time_at_point)*1000);  % better accuracy at short times
+                        pause(time_at_point)
+                    end
 
                     tf = toc;
                     e=e+1;
                     schedule(e,:) = table(ti, tf, x,y);
                 end
-
-                x_cors=fliplr(x_cors)
+                %flipping here makes it go in a zig-zag
+                % rather than moving to the left of each line
+                x_cors = fliplr(x_cors);
             end
 
             %%
@@ -259,13 +267,9 @@ classdef p1_controls
             y_axis.home();
             x_axis.home();
 
-            %connection.close();
-
             % record (ti, tf, x, y) schedule (may be redundant in image processing)
             output_file = sprintf("schedule_%s.txt", datestr(run_at, 'yyyy.mm.dd_HHMM.SS'));
             writetable(schedule, output_file,'Delimiter','\t');
-            fprintf("\nSchedule saved to %s\nSuccess!", output_file);
-            fprintf("Don't forget to close the connection!");
         end
 
         %%
