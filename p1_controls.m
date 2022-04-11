@@ -1,3 +1,12 @@
+%%
+% These are functions for scanning with the zaber platform
+% run scanUI_exported.m 
+% or type appdesigner in the command window,
+%    then open and run scanUI.mlapp
+
+% Updated April 2022 by Michaela 
+
+%%
 classdef p1_controls
     methods (Static)
 
@@ -69,8 +78,8 @@ classdef p1_controls
             x_axis = device_x.getAxis(1);
 
             %now you''re set to move!
-            y_axis.home();
-            x_axis.home();
+            %y_axis.home();
+            %x_axis.home();
         end
 
         %%

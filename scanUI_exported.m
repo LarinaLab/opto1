@@ -1,3 +1,12 @@
+%%
+% These are functions for scanning with the zaber platform
+% run scanUI_exported.m 
+% or type appdesigner in the command window,
+%    then open and run scanUI.mlapp
+
+% Updated April 2022 by Michaela 
+
+%%
 classdef scanUI_exported < matlab.apps.AppBase
 
     % Properties that correspond to app components
@@ -98,10 +107,12 @@ classdef scanUI_exported < matlab.apps.AppBase
 
                 connection.close()
                 fprintf("\nDone.\n")
+                app.LaserPromptButton.Text = "Done.";
             catch exception
                 % This happens if there was any problem in the above section
                 %   to make sure the connection closes anyway.
                 fprintf("Fail\n")
+                app.LaserPromptButton.Text = "Error";
                 connection.close();
                 rethrow(exception);
             end            
@@ -151,10 +162,12 @@ classdef scanUI_exported < matlab.apps.AppBase
 
                 connection.close()
                 fprintf("\nDone.\n")
+                app.LaserPromptButton.Text = "Done.";
             catch exception
                 % This happens if there was any problem in the above section
                 %   to make sure the connection closes anyway.
                 fprintf("Fail\n")
+                app.LaserPromptButton.Text = "Error";
                 connection.close();
                 rethrow(exception);
            end
@@ -303,7 +316,7 @@ classdef scanUI_exported < matlab.apps.AppBase
 
             % Create yAccel
             app.yAccel = uieditfield(app.LeftPanel, 'numeric');
-            app.yAccel.Limits = [0.001 59.5894];
+            app.yAccel.Limits = [1 59.5894];
             app.yAccel.Position = [143 361 45 18];
             app.yAccel.Value = 15;
 
@@ -315,7 +328,7 @@ classdef scanUI_exported < matlab.apps.AppBase
 
             % Create xAccel
             app.xAccel = uieditfield(app.LeftPanel, 'numeric');
-            app.xAccel.Limits = [0.001 59.5894];
+            app.xAccel.Limits = [1 59.5894];
             app.xAccel.Position = [143 338 45 18];
             app.xAccel.Value = 15;
 
@@ -397,8 +410,10 @@ classdef scanUI_exported < matlab.apps.AppBase
             % Create LaserPromptButton
             app.LaserPromptButton = uibutton(app.LeftPanel, 'push');
             app.LaserPromptButton.ButtonPushedFcn = createCallbackFcn(app, @time_at_loc_EditFieldValueChanged2, true);
-            app.LaserPromptButton.Position = [51 109 107 22];
-            app.LaserPromptButton.Text = '--';
+            app.LaserPromptButton.Enable = 'off';
+            app.LaserPromptButton.Tooltip = {'Run Progress'};
+            app.LaserPromptButton.Position = [37 109 130 22];
+            app.LaserPromptButton.Text = 'Align at Lower Left ';
 
             % Create OutputEditFieldLabel
             app.OutputEditFieldLabel = uilabel(app.LeftPanel);

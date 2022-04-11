@@ -1,8 +1,39 @@
+%%
+% This is the program to scan across the zaber platform
+% Note the scanUI version is better, it has a user friendly window
+
+% First set the run parameters below
+% Pushing Run will start the scan
+
+% Updated April 2022 by Michaela 
+
+%%
+
 close all force; clear; clc;
 %%
 import zaber.motion.ascii.Connection;
 import zaber.motion.Units;
 import zaber.motion.Library;
+
+%%
+% Run parameters here
+%
+% %%%%%%%%%%%%%%%
+n_rows = 3;
+n_cols = 6;
+
+y_accel = 5; % in Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
+x_accel = 5; % in Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
+
+units = Units.LENGTH_MILLIMETRES;
+x_distance = .1;
+y_distance = .1;
+
+time1 = 1; %seconds
+time_at_point = 2; %seconds
+% end variables section
+% %%%%%%%%%%%%%%%%
+
 %%
 
 %connect to device
@@ -39,47 +70,7 @@ try
     device_x = deviceList(2);
     %moves platform forward (pos) and back (neg)
     x_axis = device_x.getAxis(1);
-
-    %now you''re set to move!
-    y_axis.home();
-    x_axis.home();
-
-    %%
-    % wait for user input
-    % Run parameters here
-    %
-    % %%%%%%%%%%%%%%%
-    n_rows = 3;
-    n_cols = 6;
-    y_accel = 15; % in Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
-    x_accel = 15; % in Units.ACCELERATION_MILLIMETRES_PER_SECOND_SQUARED
-
-
-    %Units.LENGTH_MICROMETRES
-    %Units.LENGTH_NANOMETRES
-    units = Units.LENGTH_MILLIMETRES;
-    x_distance = .1;
-    y_distance = .1;
-    % or specify total_distance
-    %x_distance = width / (n_cols-1)
-    %y_distance = length / (n_rows-1)
-
-    time1 = 5; %seconds
-    time_at_point = 20; %seconds
-    %%n_rows = input("How many rows?"); %ie, 4
-    %n_cols = input("How many columns?");
-    %units = input("Units, ie Units.LENGTH_MILLIMETRES or Units.LENGTH_MICROMETRES");
-    %width = input(sprintf("How wide is the field? (%u)",units));
-    %length = input(sprintf("How long is the field? (%u)",units));
-    %x_distance = width / (n_cols-1)
-    %y_distance = length / (n_rows-1)
-
-
-    %time_at_point = input("How long in each spot?");%.02; % seconds %ex 10 seconds
-    %%%%%%%%%%%%
-    %
-    % end variables section
-
+    
     %%
     %To avoid jerky movements, set acceleration ('accel') (and/or maxspeed)
     %Note that at the end the program should set it properly back to the initial values
@@ -157,8 +148,10 @@ try
             tf = toc;
             e=e+1;
             schedule(e,:) = table(ti, tf, x,y);
-
         end
+        %flipping here makes it go in a zig-zag
+        % rather than moving to the left of each line
+        x_cors = fliplr(x_cors);
     end
 
     %%
